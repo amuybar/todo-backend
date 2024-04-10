@@ -41,6 +41,42 @@ app.post('/todos', (req, res) => {
         }
     });
 });
+// Update an existing todo
+app.put('/todos/:id', (req, res) => {
+  const { id } = req.params;
+  const { task } = req.body;
+  console.log(`PUT /todos/${id}`, task);
+  db.run("UPDATE todos SET task = ? WHERE id = ?", [task, id], function(err) {
+      if (err) {
+          console.error('Error updating todo:', err);
+          res.status(500).send('Internal Server Error');
+      } else if (this.changes === 0) {
+          console.error('Todo not found');
+          res.status(404).send('Todo not found');
+      } else {
+          console.log('Todo updated successfully');
+          res.status(200).json({ id: Number(id), task });
+      }
+  });
+});
+
+// Delete an existing todo
+app.delete('/todos/:id', (req, res) => {
+  const { id } = req.params;
+  console.log(`DELETE /todos/${id}`);
+  db.run("DELETE FROM todos WHERE id = ?", id, function(err) {
+      if (err) {
+          console.error('Error deleting todo:', err);
+          res.status(500).send('Internal Server Error');
+      } else if (this.changes === 0) {
+          console.error('Todo not found');
+          res.status(404).send('Todo not found');
+      } else {
+          console.log('Todo deleted successfully');
+          res.status(204).end();
+      }
+  });
+});
 
 // Start server
 app.listen(PORT, () => {
